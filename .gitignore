@@ -1,0 +1,137 @@
+# ------------------------------------------------------------
+# Operating-system files
+# ------------------------------------------------------------
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux / desktop environments
+*~
+.directory
+.Trash-*
+.nfs*
+
+
+# ------------------------------------------------------------
+# Editors and IDEs
+# ------------------------------------------------------------
+
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.example.json
+
+.idea/
+*.iml
+
+*.swp
+*.swo
+*.swn
+*.bak
+*.tmp
+
+
+# ------------------------------------------------------------
+# Secrets and local environment configuration
+# ------------------------------------------------------------
+
+.env
+.env.*
+!.env.example
+
+*.pem
+*.key
+*.p12
+*.pfx
+
+credentials.json
+secrets.json
+*.secret
+
+
+# ------------------------------------------------------------
+# Claude Code local state
+#
+# Keep shared skill files and project instructions committed.
+# Ignore only machine- or user-specific settings.
+# ------------------------------------------------------------
+
+.claude/settings.local.json
+.claude/*.local.json
+.claude/cache/
+.claude/logs/
+.claude/sessions/
+.claude/worktrees/
+
+
+# ------------------------------------------------------------
+# OpenAI Codex local state
+#
+# Do not ignore .codex/ wholesale: project-level Codex
+# configuration may be deliberately shared in the repository.
+# ------------------------------------------------------------
+
+.codex/*.local.toml
+.codex/cache/
+.codex/logs/
+.codex/sessions/
+.codex/tmp/
+.codex-log/
+
+
+# ------------------------------------------------------------
+# Dependencies and virtual environments
+# ------------------------------------------------------------
+
+# Node.js
+node_modules/
+.npm/
+.pnpm-store/
+.yarn/cache/
+.yarn/unplugged/
+
+# Python
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+
+# ------------------------------------------------------------
+# Build, test, and generated output
+# ------------------------------------------------------------
+
+dist/
+build/
+out/
+coverage/
+.coverage
+htmlcov/
+*.log
+
+tmp/
+temp/
+.cache/
+
+
+# ------------------------------------------------------------
+# Local test fixtures and generated skill packages
+# ------------------------------------------------------------
+
+*.skill.zip
+*.skill.tar.gz
+artifacts/
+test-output/
