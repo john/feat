@@ -126,7 +126,7 @@ Do not expand scope to fix unrelated baseline failures. If a useful baseline is 
 
 ### 5. Write the plan before product code
 
-Create or update `docs/plans/{stem}.md`. Preserve useful history when resuming. Use repository conventions when available; otherwise use:
+Create `docs/plans/` if it does not exist, then create or update `docs/plans/{stem}.md`. Preserve useful history when resuming. Use repository conventions when available; otherwise use:
 
 ```markdown
 # Plan: [feature title]
