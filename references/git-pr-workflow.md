@@ -6,9 +6,11 @@ Use this reference for `feat` preflight, branch isolation, commit, push, and pul
 
 Confirm the current directory is a Git repository with a GitHub remote and an authenticated pull-request mechanism such as `gh` or an available GitHub integration.
 
-Inspect the repository root, default and current branches, worktrees, remotes, authentication, complete working-tree status, applicable instructions, and existing plan, branch, remote branch, or pull request for the slug.
+Inspect the repository root, default and current branches, worktrees, remotes, authentication, complete working-tree status, applicable instructions, and existing plan, branch, remote branch, or pull request for the brief.
 
 Never discard, reset, clean, stash, overwrite, or commit unrelated changes.
+
+An uncommitted brief or plan for the resolved stem is related work, not unrelated work. `feat create` leaves a new brief in the working tree, so carry it onto the feature branch and commit it with the implementation.
 
 When unrelated uncommitted changes exist:
 
@@ -18,7 +20,7 @@ When unrelated uncommitted changes exist:
 
 ## Branch handling
 
-Use the repository's branch convention; otherwise use `feat/{slug}`. Resume a clearly matching local branch, remote branch, worktree, or pull request instead of creating duplicates.
+Use the repository's branch convention; otherwise use `feat/{stem}`. Resume a clearly matching local branch, remote branch, worktree, or pull request instead of creating duplicates.
 
 Create or resume the feature branch before writing the plan or changing product code. Never implement or commit on the default branch. Record the branch's starting commit as the baseline commit. When resuming and the original starting state cannot be reconstructed safely, record that limitation rather than rewriting history.
 
@@ -50,10 +52,10 @@ If no template exists, use:
 ## Summary
 
 ## Source brief
-`docs/features/{slug}.md`
+`docs/features/{stem}.md`
 
 ## Implementation plan
-`docs/plans/{slug}.md`
+`docs/plans/{stem}.md`
 
 ## Acceptance criteria
 

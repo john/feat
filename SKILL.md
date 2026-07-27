@@ -1,40 +1,62 @@
 ---
 name: feat
-description: Execute one repository feature from a versioned brief at docs/features/SLUG.md through planning, implementation, verification, commit, push, and pull request. Use only when the user explicitly invokes or requests the feat workflow with a brief slug; do not use for general feature discussion, planning-only work, code review, merge, release, or deployment. Write docs/plans/SLUG.md, establish a practical pre-change verification baseline, trace every acceptance criterion to implementation and evidence, compare final results with the baseline, and stop after opening or updating the pull request. An optional assume mode resolves material ambiguity conservatively without pausing.
+description: Create and execute versioned repository feature briefs. The create command scaffolds a numbered brief at docs/features/NNNN-name.md from a template. The run command executes one existing brief through planning, implementation, verification, commit, push, and pull request. Use only when the user explicitly invokes or requests the feat workflow; do not use for general feature discussion, planning-only work, code review, merge, release, or deployment. Run writes docs/plans/NNNN-name.md, establishes a practical pre-change verification baseline, traces every acceptance criterion to implementation and evidence, compares final results with the baseline, and stops after opening or updating the pull request. An optional assume mode resolves material ambiguity conservatively without pausing.
 ---
 
 # Feat
 
-Execute one feature through:
+Two commands:
 
-brief -> branch -> baseline -> plan -> implementation -> verification -> pull request
+- `create` scaffolds a numbered feature brief from a template.
+- `run` executes one brief through: brief -> branch -> baseline -> plan -> implementation -> verification -> pull request
 
 The pull request is the terminal action. Never merge, release, or deploy as part of this skill.
 
 ## Parse the request
 
-Read arguments from the user request or an `ARGUMENTS:` block appended by the client.
+Read arguments from the user request or an `ARGUMENTS:` block appended by the client. The first argument is the command:
 
-- First argument: `slug`.
-- Optional second argument: `assume`, case-insensitively.
-- Reject any other second argument or extra arguments.
-- Accept only a filename stem matching `[A-Za-z0-9][A-Za-z0-9_-]*`.
-- Reject path separators, `..`, absolute paths, and path overrides.
+| Command | Arguments |
+|---|---|
+| `create` | `NAME ["description"]` |
+| `run` | `NAME [assume]` |
+| `list` | none |
 
-Derive:
+Match the command case-insensitively. When the first argument is missing or is not one of these commands, print the usage below along with the sorted stems from `docs/features/*.md`, and stop.
 
-- Brief: `docs/features/{slug}.md`
-- Plan: `docs/plans/{slug}.md`
+```text
+/feat create NAME ["description"]   scaffold a new brief
+/feat run NAME [assume]             execute an existing brief
+/feat list                          list available briefs
+```
 
-If no slug is supplied, list sorted stems from `docs/features/*.md`, show `/feat SLUG [assume]` and `$feat SLUG [assume]`, and stop.
+Never treat a bare first argument as a brief name. Earlier versions accepted `/feat NAME`; that form is no longer supported.
 
-## Apply the run mode
+Reject extra arguments, and any second argument to `run` other than `assume`, matched case-insensitively.
 
-**Default:** Ask one consolidated set of blocking questions before planning or implementation when ambiguity would materially change scope, observable behavior, acceptance criteria, data, security, privacy, migration, or compatibility. Do not ask about choices settled by the brief or clear repository conventions.
+`list` prints the sorted stems from `docs/features/*.md` and stops. Say so plainly when there are none.
 
-**Assume:** Do not pause for clarification. Choose the narrowest reasonable, reversible interpretation; record each material assumption in the plan; and defer adjacent work instead of expanding scope.
+### Names and paths
 
-Assume mode does not bypass permissions, sandboxing, credentials, repository policy, branch protection, verification, safety constraints, or hard blockers. Stop when safe completion requires unavailable access, information, tooling, credentials, or repository state.
+Accept only a name matching `[A-Za-z0-9][A-Za-z0-9_-]*`. Reject path separators, `..`, absolute paths, and path overrides.
+
+Briefs live at `docs/features/{NNNN}-{name}.md`. For `docs/features/0007-account-export.md`:
+
+- Stem: `0007-account-export`
+- Number: `0007`
+- Name: `account-export`
+- Plan: `docs/plans/0007-account-export.md`
+- Branch: `feat/0007-account-export`
+
+### Resolve a run argument
+
+Match the argument against the stems of `docs/features/*.md`, case-insensitively, in this order:
+
+1. Exact stem, such as `0007-account-export`.
+2. An all-digit argument, compared numerically against each leading number, so `7`, `07`, and `0007` all resolve to `0007-account-export`.
+3. The name alone: the stem with its `NNNN-` prefix removed, or a stem that never had one.
+
+With no match, list every available brief and stop without creating files or branches. With more than one match, list only the matching stems and stop. Briefs written before numbering existed carry no prefix and resolve by rules 1 and 3.
 
 ## Preserve repository and user intent
 
@@ -44,25 +66,51 @@ Treat the brief as the source of truth. Do not implement adjacent improvements w
 
 Before branch changes, commits, pushes, or pull-request work, read [references/git-pr-workflow.md](references/git-pr-workflow.md).
 
-## Workflow
+## Create a brief
+
+`/feat create NAME ["description"]`
+
+Scaffold one brief and stop. Do not create branches, commits, or pull requests, and do not implement anything.
+
+1. Create `docs/features/` if it does not exist.
+2. Strip any leading `NNNN-` or `NNNN_` from the name; this command assigns the number.
+3. If a brief with the same name already exists at any number, stop and report its path. Names stay unique so that `run` can resolve them.
+4. Determine the next number: take the highest leading number across `docs/features/*.md` and add one, starting at `0001` when no numbered brief exists. Zero-pad to four digits, widening only when the number no longer fits. Never reuse a gap.
+5. Read [references/brief-template.md](references/brief-template.md). Replace `{Title}` with the name, hyphens and underscores as spaces and the first letter capitalized.
+6. Without a description, write the template unchanged; its italic placeholders are the author's prompts. With a description, replace the placeholders under Outcome, Scope, and Acceptance criteria with content drawn from it, and leave every section the description does not support as a placeholder. Never invent constraints, dependencies, or acceptance criteria the user did not state.
+7. Write `docs/features/{NNNN}-{name}.md`, report the path and the `run` command that would execute it, and stop.
+
+## Run a brief
+
+`/feat run NAME [assume]`
+
+Resolve the argument to a brief, then work through the run mode and the numbered steps below.
+
+### Apply the run mode
+
+**Default:** Ask one consolidated set of blocking questions before planning or implementation when ambiguity would materially change scope, observable behavior, acceptance criteria, data, security, privacy, migration, or compatibility. Do not ask about choices settled by the brief or clear repository conventions.
+
+**Assume:** Do not pause for clarification. Choose the narrowest reasonable, reversible interpretation; record each material assumption in the plan; and defer adjacent work instead of expanding scope.
+
+Assume mode does not bypass permissions, sandboxing, credentials, repository policy, branch protection, verification, safety constraints, or hard blockers. Stop when safe completion requires unavailable access, information, tooling, credentials, or repository state.
 
 ### 1. Read and frame the brief
 
-Read `docs/features/{slug}.md`. If it is absent, list available brief slugs and stop without creating files or branches.
+Read `docs/features/{stem}.md`.
 
 Extract the intended outcome, in-scope behavior, explicit exclusions, constraints, dependencies, rollout or migration requirements, risks, and acceptance criteria. Give each criterion a stable ID such as `AC-1`; preserve existing IDs and wording where practical.
 
-Treat ambiguity as blocking when plausible interpretations would produce meaningfully different behavior, interfaces, data, security posture, migration requirements, or acceptance results. Resolve it according to the active run mode.
+Treat ambiguity as blocking when plausible interpretations would produce meaningfully different behavior, interfaces, data, security posture, migration requirements, or acceptance results. Resolve it according to the active run mode. A brief still carrying the italic placeholder text from `references/brief-template.md` is unfinished; treat each unfilled section as material ambiguity of exactly this kind.
 
 ### 2. Preflight and explore
 
 Follow the preflight and unrelated-work rules in `references/git-pr-workflow.md`.
 
-Read the smallest useful set of files, widening only when evidence requires it. Identify analogous implementations, architecture and coding conventions, affected interfaces or schemas, relevant tests, standard verification commands, documentation, accessibility, security, telemetry, migrations, and any existing plan, branch, or pull request for the slug.
+Read the smallest useful set of files, widening only when evidence requires it. Identify analogous implementations, architecture and coding conventions, affected interfaces or schemas, relevant tests, standard verification commands, documentation, accessibility, security, telemetry, migrations, and any existing plan, branch, or pull request for the brief.
 
 ### 3. Create or resume the feature branch
 
-Follow repository branch conventions; otherwise use `feat/{slug}`. Resume clearly matching work instead of creating duplicates. Create or resume the branch before writing the plan or changing product code. Never work directly on the default branch.
+Follow repository branch conventions; otherwise use `feat/{stem}`. Resume clearly matching work instead of creating duplicates. Create or resume the branch before writing the plan or changing product code. Never work directly on the default branch.
 
 ### 4. Establish the verification baseline
 
@@ -78,12 +126,12 @@ Do not expand scope to fix unrelated baseline failures. If a useful baseline is 
 
 ### 5. Write the plan before product code
 
-Create or update `docs/plans/{slug}.md`. Preserve useful history when resuming. Use repository conventions when available; otherwise use:
+Create or update `docs/plans/{stem}.md`. Preserve useful history when resuming. Use repository conventions when available; otherwise use:
 
 ```markdown
 # Plan: [feature title]
 
-Source brief: docs/features/{slug}.md
+Source brief: docs/features/{stem}.md
 Status: in progress
 Base commit: [commit]
 
@@ -146,7 +194,7 @@ Use a ready-for-review pull request only when all required criteria pass and no 
 
 After opening or updating the pull request, stop. Treat any requested merge, release, or deployment as separate follow-up work outside this skill.
 
-## Report the result
+### 9. Report the result
 
 Report:
 
