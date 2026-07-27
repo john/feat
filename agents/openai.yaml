@@ -1,6 +1,6 @@
 interface:
   display_name: "Feat"
-  short_description: "Build a repo feature from brief to PR"
-  default_prompt: "Use $feat with a feature brief slug, optionally followed by yolo. Example: $feat account-export"
+  short_description: "Scaffold a feature brief, then build it from brief to PR"
+  default_prompt: "Use $feat create NAME to scaffold a feature brief, or $feat run NAME to execute one, optionally followed by assume. Example: $feat run account-export"
 policy:
   allow_implicit_invocation: false
