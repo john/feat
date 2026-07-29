@@ -10,13 +10,9 @@ Inspect the repository root, default and current branches, worktrees, remotes, a
 
 Never discard, reset, clean, stash, overwrite, or commit unrelated changes.
 
-An uncommitted brief or plan for the resolved stem is related work, not unrelated work. `feat create` leaves a new brief in the working tree, so carry it onto the feature branch and commit it with the implementation.
+An uncommitted brief or plan for the resolved stem is related work, not unrelated work. `feat create` leaves a new brief in the working tree and `feat plan` leaves a plan, so carry both onto the feature branch and commit them with the implementation.
 
-When unrelated uncommitted changes exist:
-
-- Default mode: ask how the user wants the feature isolated before editing.
-- Assume mode: use a separate worktree or other safe isolation without touching those changes.
-- Stop if safe isolation is unavailable.
+When unrelated uncommitted changes exist, ask how the user wants the feature isolated before editing. This is a question about repository state, not feature scope, so `run` asks it even though it takes no planning mode. Stop if safe isolation is unavailable.
 
 ## Branch handling
 
