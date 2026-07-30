@@ -1,13 +1,18 @@
 # Feat
 
-`feat` is a portable Agent Skill that turns a feature idea into a versioned brief, then executes that brief through branch isolation, planning, implementation, verification, commit, push, and a GitHub pull request.
+`feat` is a portable Agent Skill that turns a feature idea into a versioned brief, then into a reviewable implementation plan, then into a GitHub pull request.
 
-The brief, implementation plan, code, and verification evidence are versioned together, creating an auditable chain from the original request to the resulting pull request. The workflow stops at the pull request. It never merges, releases, or deploys.
+The work happens in three deliberate stages, and each one stops so you can read what it produced:
 
 ```text
 /feat create account-export     scaffold docs/features/0007-account-export.md
-/feat run account-export        execute it, ending at a pull request
+/feat plan account-export       write docs/plans/0007-account-export.md, then stop
+/feat run account-export        implement the plan, ending at a pull request
 ```
+
+The pause between `plan` and `run` is the point. You review and revise the plan while changing it is still cheap, rather than discovering the approach was wrong after the code exists.
+
+The brief, implementation plan, code, and verification evidence are versioned together, creating an auditable chain from the original request to the resulting pull request. The workflow stops at the pull request. It never merges, releases, or deploys.
 
 ## Package layout
 
@@ -22,7 +27,7 @@ feat/
     └── git-pr-workflow.md
 ```
 
-`SKILL.md` is the cross-platform control plane and the single source of truth for the feature workflow. `references/brief-template.md` is the scaffold that `create` writes. `references/git-pr-workflow.md` contains detailed branch, commit, push, and pull-request handling so the core instructions remain focused. `agents/openai.yaml` is optional OpenAI metadata that improves presentation and disables implicit invocation in supported OpenAI clients.
+`SKILL.md` is the cross-platform control plane and the single source of truth for the feature workflow. `references/brief-template.md` is the scaffold that `create` writes. `references/git-pr-workflow.md` contains detailed branch, commit, push, and pull-request handling, all of which belongs to `run`, so the core instructions remain focused. `agents/openai.yaml` is optional OpenAI metadata that improves presentation and disables implicit invocation in supported OpenAI clients.
 
 No duplicate prompt, `CLAUDE.md`, or `.claude/commands` wrapper is required. Install the same `feat` directory in each client's skills location.
 
@@ -44,24 +49,57 @@ With no description, the file arrives as the bare scaffold for you to fill in. W
 /feat create account-export "let users download their data as CSV from settings"
 ```
 
-The draft is a starting point, not a finished brief. Read it before running it. `run` treats any remaining placeholder as an unanswered question about scope.
+The draft is a starting point, not a finished brief. Read it before planning it. `plan` treats any remaining placeholder as an unanswered question about scope.
 
 Implementation philosophy belongs in your repository's `CLAUDE.md` or `AGENTS.md`, where it applies to every feature, rather than being restated in each brief.
 
-## What running a brief does
+## Plan a brief
 
-For a brief at `docs/features/0007-account-export.md`, `run`:
+```text
+/feat plan NAME [assume]
+```
+
+For a brief at `docs/features/0007-account-export.md`, `plan`:
 
 1. Reads the brief and assigns stable IDs such as `AC-1` to its acceptance criteria.
-2. Inspects repository instructions, existing work, and relevant implementation patterns.
-3. Creates or resumes an isolated feature branch.
-4. Runs practical pre-change checks and records a verification baseline.
-5. Writes or updates `docs/plans/0007-account-export.md` before changing product code.
-6. Maps every acceptance criterion to planned implementation and verification evidence.
-7. Implements the smallest coherent change that satisfies the brief.
-8. Reruns relevant checks, compares final results with the baseline, and records any regressions or limitations.
-9. Commits and pushes only the intended work, then opens or updates exactly one pull request.
-10. Stops and reports the result without merging, releasing, or deploying.
+2. Asks any blocking questions about ambiguous scope, unless `assume` is given.
+3. Inspects repository instructions, existing work, and relevant implementation patterns, read-only.
+4. Chooses the checks that will serve as `run`'s verification baseline.
+5. Writes `docs/plans/0007-account-export.md` with scope, assumptions, one traceability row per criterion, sequenced steps, expected files, risks, and follow-ups.
+6. Reports the plan path and stops.
+
+`plan` writes one file. It creates no branches and no commits, runs no baseline, and touches no product code. Everything `run` needs goes into the plan file, because `run` starts from the plan rather than from the planning conversation.
+
+Re-running `plan` on the same brief revises the existing plan in place rather than discarding earlier decisions. You can also edit the plan yourself; it is an ordinary Markdown file, and `run` reads whatever it says.
+
+## Run a plan
+
+```text
+/feat run NAME
+```
+
+Once the plan looks right, `run`:
+
+1. Reads the brief and the plan, and stops if no plan exists yet.
+2. Confirms the repository, remote, and pull-request mechanism are usable.
+3. Creates or resumes an isolated feature branch and records the base commit.
+4. Runs the plan's baseline commands and records their results before changing anything.
+5. Implements the plan's steps, the smallest coherent change that satisfies the criteria.
+6. Reruns relevant checks, compares final results with the baseline, and records any regressions or limitations.
+7. Maps every acceptance criterion to actual implementation and verification evidence.
+8. Commits and pushes only the intended work, then opens or updates exactly one pull request.
+9. Stops and reports the result without merging, releasing, or deploying.
+
+`run` does not reframe the brief and does not ask scope questions; the plan is the agreement. It asks only about repository state, such as how to isolate unrelated uncommitted changes.
+
+Without a plan, `run` stops and tells you what to do:
+
+```text
+No plan found at docs/plans/0007-account-export.md.
+Run /feat plan account-export first, review the plan, then run /feat run account-export.
+```
+
+If implementation reveals the plan is wrong, `run` stops at the point it breaks down and reports the conflict rather than silently redesigning. Revise the plan and run it again.
 
 ## Requirements in the target repository
 
@@ -93,8 +131,9 @@ Invoke it with:
 
 ```text
 /feat create account-export
+/feat plan account-export
+/feat plan account-export assume
 /feat run account-export
-/feat run account-export assume
 ```
 
 ## Install for Codex or ChatGPT desktop
@@ -117,11 +156,12 @@ In Codex CLI or an IDE integration, invoke it with:
 
 ```text
 $feat create account-export
+$feat plan account-export
+$feat plan account-export assume
 $feat run account-export
-$feat run account-export assume
 ```
 
-In ChatGPT desktop, select **Feat** from the Skills interface and provide the command and brief name, optionally followed by `assume`.
+In ChatGPT desktop, select **Feat** from the Skills interface and provide the command and brief name, optionally following `plan` with `assume`.
 
 Copying the directory instead of symlinking also works. Symlinking keeps one checkout as the source of truth across clients.
 
@@ -131,30 +171,33 @@ The first argument is always the command.
 
 ```text
 /feat create NAME ["description"]   scaffold a new brief
-/feat run NAME [assume]             execute an existing brief
+/feat plan NAME [assume]            turn a brief into a reviewable plan
+/feat run NAME                      implement an approved plan
 /feat list                          list available briefs
 ```
 
-A name may contain letters, numbers, underscores, and hyphens. Paths, path separators, `..`, absolute paths, extra arguments, and any second argument to `run` other than `assume` are rejected. Without a recognized command, the skill prints this usage along with the available briefs and stops.
+A name may contain letters, numbers, underscores, and hyphens. Paths, path separators, `..`, absolute paths, extra arguments, any second argument to `plan` other than `assume`, and any second argument to `run` are rejected. Without a recognized command, the skill prints this usage along with the available briefs and stops.
 
-`run` accepts a brief's number, its name, or its full stem, so all three of these reach `docs/features/0007-account-export.md`:
+`plan` and `run` both accept a brief's number, its name, or its full stem, so all four of these reach `docs/features/0007-account-export.md`:
 
 ```text
-/feat run 7
-/feat run 0007
-/feat run account-export
-/feat run 0007-account-export
+/feat plan 7
+/feat plan 0007
+/feat plan account-export
+/feat plan 0007-account-export
 ```
 
-An argument matching more than one brief lists the candidates and stops rather than guessing. Briefs written before numbering existed still run by name.
+An argument matching more than one brief lists the candidates and stops rather than guessing. An argument matching none lists every available brief. Briefs written before numbering existed still resolve by name.
 
-Earlier versions accepted a bare `/feat SLUG`. That form is no longer supported; use `/feat run SLUG`.
+Earlier versions accepted a bare `/feat SLUG`. That form is no longer supported; use `/feat plan SLUG` followed by `/feat run SLUG`. Earlier versions also accepted `/feat run SLUG assume`; `assume` now belongs to `plan`, which is where questions are asked.
 
-## Run modes
+## Planning modes
+
+Modes apply to `plan`, which is where clarifying questions are asked. `run` executes an approved plan and takes no mode.
 
 ### Default
 
-Default mode asks one consolidated set of blocking questions before planning or implementation when an ambiguity would materially change scope, observable behavior, acceptance criteria, data handling, security, privacy, migration, or compatibility.
+Default mode asks one consolidated set of blocking questions before writing the plan when an ambiguity would materially change scope, observable behavior, acceptance criteria, data handling, security, privacy, migration, or compatibility.
 
 It does not ask about matters already settled by the brief or clear repository conventions.
 
@@ -166,20 +209,22 @@ It does not ask about matters already settled by the brief or clear repository c
 
 ## Planning and traceability
 
-Before changing product code, the skill writes or updates `docs/plans/NNNN-NAME.md`, matching the brief's filename so the pair stays together. The plan records:
+`plan` writes `docs/plans/NNNN-NAME.md`, matching the brief's filename so the pair stays together. The plan records:
 
-- The source brief and base commit.
+- The source brief and the commit it was planned against.
 - Intended outcome and scope boundaries.
-- Assumptions and decisions.
+- Assumptions and decisions, including every answer given to a clarifying question.
 - One traceability row for every acceptance criterion.
-- Exact baseline commands and their results.
+- The commands `run` should use as its verification baseline.
 - Sequenced implementation steps, expected files, risks, and follow-ups.
+
+`run` fills in the rest: the base commit, baseline and final results, actual implementation references, and evidence. A plan's status moves from `planned` to `in progress` to either `implemented` or `blocked`.
 
 Each acceptance criterion begins as `planned` and ends as `pass`, `fail`, or `blocked`, with actual implementation references and direct verification evidence. The skill never marks a criterion `pass` without evidence.
 
 ## Verification baseline
 
-Before implementation, the skill runs the narrowest practical existing checks that are relevant to the feature and can be rerun afterward. It records the base commit, exact commands, results, and identifiable pre-existing failures.
+`plan` chooses the baseline commands; `run` executes them. Before implementation, `run` runs the narrowest practical existing checks that are relevant to the feature and can be rerun afterward. It records the base commit, exact commands, results, and identifiable pre-existing failures.
 
 After implementation, it reruns those commands along with checks for the new behavior and compares the results. A failure is called pre-existing only when a materially equivalent failure was observed before the change.
 
@@ -187,7 +232,9 @@ The skill does not expand scope to fix unrelated baseline failures. When a meani
 
 ## Branch and pull-request behavior
 
-The skill never implements or commits directly on the repository's default branch. It follows the repository's branch convention or uses `feat/NNNN-NAME`, safely resumes matching work, and avoids duplicate branches or pull requests.
+All branch, commit, push, and pull-request work belongs to `run`. `create` and `plan` only write their own file.
+
+`run` never implements or commits directly on the repository's default branch. It follows the repository's branch convention or uses `feat/NNNN-NAME`, safely resumes matching work, and avoids duplicate branches or pull requests.
 
 It preserves unrelated user work, never force-pushes, does not bypass hooks, and stages only intended paths. A pull request is ready for review only when all required criteria pass and no relevant new failure remains. Otherwise, the skill may preserve the work in a clearly blocked draft pull request when repository policy permits it.
 

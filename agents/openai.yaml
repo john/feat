@@ -1,6 +1,6 @@
 interface:
   display_name: "Feat"
-  short_description: "Scaffold a feature brief, then build it from brief to PR"
-  default_prompt: "Use $feat create NAME to scaffold a feature brief, or $feat run NAME to execute one, optionally followed by assume. Example: $feat run account-export"
+  short_description: "Scaffold a feature brief, plan it, then build it into a PR"
+  default_prompt: "Use $feat create NAME to scaffold a feature brief, $feat plan NAME to turn it into a reviewable plan, optionally followed by assume, then $feat run NAME to implement that plan. Example: $feat plan account-export"
 policy:
   allow_implicit_invocation: false
