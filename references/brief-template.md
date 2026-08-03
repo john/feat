@@ -24,3 +24,7 @@
 ## Constraints and dependencies
 
 *Compatibility, data, security, or migration requirements, and anything this depends on. "None known" is a fine answer.*
+
+## General guidance
+
+- Before you write the plan, ask any questions you need to in order to best implement the brief
