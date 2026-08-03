@@ -24,10 +24,12 @@ feat/
 │   └── openai.yaml
 └── references/
     ├── brief-template.md
-    └── git-pr-workflow.md
+    ├── git-pr-workflow.md
+    ├── plan.md
+    └── run.md
 ```
 
-`SKILL.md` is the cross-platform control plane and the single source of truth for the feature workflow. `references/brief-template.md` is the scaffold that `create` writes. `references/git-pr-workflow.md` contains detailed branch, commit, push, and pull-request handling, all of which belongs to `run`, so the core instructions remain focused. `agents/openai.yaml` is optional OpenAI metadata that improves presentation and disables implicit invocation in supported OpenAI clients.
+`SKILL.md` is the cross-platform control plane and the single source of truth for the feature workflow. It routes each command and carries the `create` steps inline, because `create` is short and runs often; the longer `plan` and `run` workflows live in `references/plan.md` and `references/run.md` and are read only when those commands are invoked. This keeps `create` from loading instructions it will never execute. `references/brief-template.md` is the scaffold that `create` writes. `references/git-pr-workflow.md` contains detailed branch, commit, push, and pull-request handling, all of which belongs to `run`, so the core instructions remain focused. `agents/openai.yaml` is optional OpenAI metadata that improves presentation and disables implicit invocation in supported OpenAI clients.
 
 No duplicate prompt, `CLAUDE.md`, or `.claude/commands` wrapper is required. Install the same `feat` directory in each client's skills location.
 
