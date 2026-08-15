@@ -1,6 +1,6 @@
 # Feat
 
-`feat` is a portable Agent Skill that turns a feature idea into a versioned brief, then into a reviewable implementation plan, then into a GitHub pull request.
+`feat` is a skill that turns a feature idea into a well-structured prompt for the LLM, called a brief. It then uses the brief to build an implementation plan, and runs the plan.
 
 The work happens in three deliberate stages, and each one stops so you can read what it produced:
 
@@ -10,9 +10,9 @@ The work happens in three deliberate stages, and each one stops so you can read 
 /feat run account-export        implement the plan, ending at a pull request
 ```
 
-The pause between `plan` and `run` is the point. You review and revise the plan while changing it is still cheap, rather than discovering the approach was wrong after the code exists.
+Feat shifts the focus of review so that more of it is done prior to implementation. You review and revise the plan while changing it is still cheap, rather than discovering the approach was wrong or not well-described after the code exists.
 
-The brief, implementation plan, code, and verification evidence are versioned together, creating an auditable chain from the original request to the resulting pull request. The workflow stops at the pull request. It never merges, releases, or deploys.
+The brief, implementation plan, and code are all versioned together, creating an auditable chain from the original request to the resulting pull request. The workflow stops at the pull request. It never merges, releases, or deploys.
 
 ## Package layout
 
